@@ -14,8 +14,8 @@ func main() {
 	*/
 	out := make(chan ListenOut)
 	stop := make(chan bool)
-	initHuobi(out, stop)
-	//initBinance(out, stop, c)
+	//initHuobi(out, stop)
+	initBinance(out, stop)
 	time.Sleep(50000*time.Second)
 	stop <- true
 }

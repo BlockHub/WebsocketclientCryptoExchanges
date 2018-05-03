@@ -1,6 +1,8 @@
 package main
 
-import "github.com/gorilla/websocket"
+import (
+	"github.com/gorilla/websocket"
+)
 
 //Data to go to out channel
 //all data from exchanges should be in ListenOut before it leaves te scraper
@@ -37,9 +39,9 @@ type Client struct{
 type Ws struct {
 	conn 		*websocket.Conn
 	connected 	bool
+	substream	GenericStream
 }
 
-type BinanceStreams struct {
-	symbol 		string
-	streamtype 	string
+func newWs(conn *websocket.Conn, connected bool, gs GenericStream) Ws{
+	return Ws{conn, connected, gs}
 }

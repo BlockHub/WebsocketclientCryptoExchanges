@@ -11,7 +11,7 @@ func NewClient(url string, handler GenericresHandler) Client {
 	return c
 }
 
-func (c *Client) EstablishConn(url string, out chan ListenOut, stop chan bool) Ws {
+func (c *Client) EstablishConn(url string, out chan ListenOut, stop chan bool, gs GenericStream) Ws {
 	d := websocket.DefaultDialer
 	req := http.Header{}
 	conn, res, err := d.Dial(url, req)
@@ -22,21 +22,21 @@ func (c *Client) EstablishConn(url string, out chan ListenOut, stop chan bool) W
 	if (err != nil){
 		panic(err)
 	}
-	go c.listener(conn, out, stop)
-	webSocket := Ws{conn, true}
+	webSocket := Ws{conn, true, gs}
+	go c.listener(webSocket, out, stop)
 	return webSocket
 }
 
-func (c *Client) listener( conn *websocket.Conn, out chan ListenOut, stop chan bool, ) {
-	defer conn.Close()
+func (c *Client) listener( ws Ws, out chan ListenOut, stop chan bool, ) {
+	defer ws.conn.Close()
 	for {
 		select {
 		default:
-			_, r, err := conn.NextReader()
+			_, r, err := ws.conn.NextReader()
 			if (err != nil) {
 				panic(err)
 			}
-			c.handler.handle(conn, r, out)
+			c.handler.handle(ws, r, out)
 		case <-stop:
 			return
 		}
