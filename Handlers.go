@@ -34,7 +34,7 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 		ws.conn.WriteMessage(2, messageOut)
 		out <- ListenOut{2, messageIn}
 	} else if (status && connecterr) {
-		ws.substream.reconnect()
+		//TODO make the ws struct reconnect if it has no more conn
 	} else {
 		//TODO replace messagetype
 		out <- ListenOut{2, messageIn}
@@ -43,6 +43,7 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 }
 
 // send a subscription message to huobi
+// TODO incorporate this in the ws struct
 func (h HuobiHandler) subscribe(ws Ws, subMessage string, id string){
 	err := ws.conn.WriteMessage(websocket.TextMessage, prepSubmessage(subMessage, id))
 	if err != nil {

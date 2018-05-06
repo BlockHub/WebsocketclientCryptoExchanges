@@ -6,12 +6,12 @@ import (
 )
 
 
-func NewClient(url string, handler GenericresHandler) Client {
-	c := Client{url, handler}
+func NewClient(handler GenericresHandler) Client {
+	c := Client{handler}
 	return c
 }
 
-func (c *Client) EstablishConn(url string, out chan ListenOut, stop chan bool, gs GenericStream) Ws {
+func (c *Client) EstablishConn(url string, subscription string,out chan ListenOut, stop chan bool ) Ws {
 	d := websocket.DefaultDialer
 	req := http.Header{}
 	conn, res, err := d.Dial(url, req)
@@ -22,7 +22,7 @@ func (c *Client) EstablishConn(url string, out chan ListenOut, stop chan bool, g
 	if (err != nil){
 		panic(err)
 	}
-	webSocket := Ws{conn, true, gs}
+	webSocket := Ws{conn, true,url, subscription }
 	go c.listener(webSocket, out, stop)
 	return webSocket
 }

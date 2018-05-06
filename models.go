@@ -30,18 +30,18 @@ type SubReqSend struct {
 
 //represents a client, one client can have multiple connections
 type Client struct{
-	url 		string
 	handler 	GenericresHandler
 
 }
 
 //represents a websocket
 type Ws struct {
-	conn 		*websocket.Conn
-	connected 	bool
-	substream	GenericStream
+	conn 			*websocket.Conn
+	connected 		bool
+	url 			string
+	subscription	string
 }
 
-func newWs(conn *websocket.Conn, connected bool, gs GenericStream) Ws{
-	return Ws{conn, connected, gs}
+func newWs(conn *websocket.Conn, connected bool, url string, subscription string) Ws{
+	return Ws{conn, connected, url, subscription}
 }
