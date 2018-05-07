@@ -199,6 +199,14 @@ func (bf BitfinexHandler) EstablishConn(url string, subscription string,id strin
 	return ws
 }
 
+func (bf BitfinexHandler) subscribe(ws Ws) {
+	subMessage, err := json.Marshal(BitFinexSub{"subscribe,", "ticker", "tBTCUSD"})
+	if err != nil {
+		panic(err)
+	}
+	ws.conn.WriteMessage(websocket.TextMessage, subMessage)
+}
+
 func (bf BitfinexHandler) reconnector(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
 
 }

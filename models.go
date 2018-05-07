@@ -23,3 +23,9 @@ type SubReqSend struct {
 	ID    string `json:"id"`
 	Unsub string `json:"unsub"`
 }
+type BitFinexSub struct {
+	event string 	`json:"event"`
+	channel string 	`json:"channel"`
+	symbol string	`json:"symbol"`
+
+}
