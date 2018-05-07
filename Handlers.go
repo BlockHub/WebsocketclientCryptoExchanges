@@ -24,11 +24,10 @@ type HuobiHandler struct {}
 func (h HuobiHandler) EstablishConn(url string, subscription string, id string,
 									out chan ListenOut, stop chan bool, d *websocket.Dialer ) Ws {
 	req := http.Header{}
-	conn, res, err := d.Dial(url, req)
+	conn, _, err := d.Dial(url, req)
 	if err != nil {
 		panic(err)
 	}
-	defer res.Body.Close()
 	if (err != nil){
 		panic(err)
 	}
@@ -67,11 +66,6 @@ func (h HuobiHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *web
 			_, r, err := ws.conn.NextReader()
 			h.heartBeat(ws)
 			if (err != nil) {
-				/*if websocket.IsUnexpectedCloseError(err, websocket.CloseAbnormalClosure) {
-					h.reconnector(ws, out, stop, d)
-					ws.connected=false
-					return
-				} else {*/
 				panic(err)
 			} else {
 				h.handle(ws, r, out)
@@ -168,5 +162,47 @@ func (b BinanceHandler) reconnector(ws Ws, out chan ListenOut, stop chan bool, d
 }
 
 func (b BinanceHandler) heartBeat(ws Ws){
+	ping, err := json.Marshal(PingData{1})
+	if err != nil {
+		panic(err)
+	}
+	ws.conn.WriteMessage(9, ping)
+}
 
+type BitfinexHandler struct {
+
+}
+
+func (bf BitfinexHandler) handle(ws Ws ,reader io.Reader, out chan ListenOut){
+	out <- ListenOut{2, (string(streamToByte(reader)))}
+}
+
+func (bf BitfinexHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
+	defer ws.conn.Close()
+	for {
+		_, r, err := ws.conn.NextReader()
+		if err != nil {
+			panic(err)
+		}
+		bf.handle(ws, r, out)
+	}
+}
+
+func (bf BitfinexHandler) EstablishConn(url string, subscription string,id string, out chan ListenOut, stop chan bool, d *websocket.Dialer) Ws {
+	req := http.Header{}
+	conn, res, err := d.Dial(url, req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	ws := Ws{conn,true, url, subscription, id}
+	return ws
+}
+
+func (bf BitfinexHandler) reconnector(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
+
+}
+
+func (bf BitfinexHandler) heartBeat(ws Ws){
+	ws.conn.PingHandler()
 }
