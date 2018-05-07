@@ -17,6 +17,6 @@ func NewClient(handler GenericresHandler) Client {
 func (c *Client)start(url string, subscription string, id string, out chan ListenOut, stop chan bool){
 	d := websocket.DefaultDialer
 	ws := c.handler.EstablishConn(url, subscription, id, out, stop, d)
-	go c.handler.listener(ws, out, stop)
+	go c.handler.listener(ws, out, stop, d)
 	go c.handler.reconnector(ws, out, stop, d)
 }

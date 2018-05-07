@@ -8,11 +8,12 @@ func initHuobi( out chan ListenOut, stop chan bool){
 	go Printer(out, stop)
 
 }
-/*
+
+
 //start connection with binance
 func initBinance(out chan ListenOut, stop chan bool) {
-	c := NewClient("wss://stream.binance.com:9443/ws/", BinanceHandler{},)
-	ws := c.EstablishConn(c.url, out, stop)
+	c := NewClient(BinanceHandler{},)
+	c.start("wss://stream.binance.com:9443/ws/", "bnbbtc@trade","id1", out, stop)
+	go Printer(out, stop)
 
 }
-*/

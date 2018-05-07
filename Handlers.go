@@ -6,16 +6,16 @@ import (
 	"regexp"
 	"strconv"
 	"encoding/json"
-	"bytes"
 	"fmt"
 	"net/http"
 )
 
 type GenericresHandler interface {
 	handle(ws Ws ,reader io.Reader, out chan ListenOut)
-	listener(ws Ws, out chan ListenOut, stop chan bool)
+	listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer)
 	EstablishConn(url string, subscription string,id string, out chan ListenOut, stop chan bool, d *websocket.Dialer) Ws
 	reconnector(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer)
+	heartBeat(ws Ws)
 }
 
 
@@ -34,8 +34,6 @@ func (h HuobiHandler) EstablishConn(url string, subscription string, id string,
 	}
 	ws := Ws{conn, true,url, subscription,  id}
 	h.subscribe(ws, ws.subscription, ws.id)
-	go h.listener(ws, out, stop)
-	go h.reconnector(ws, out, stop, d)
 	return ws
 }
 
@@ -54,22 +52,27 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 		}
 		ws.conn.WriteMessage(2, messageOut)
 		out <- ListenOut{2, messageIn}
-	} else {
+	} else if matched, _ := regexp.MatchString("pong*", messageIn); !matched{
 		//TODO replace messagetype
 		out <- ListenOut{2, messageIn}
 	}
 
 }
 
-func (h HuobiHandler) listener(ws Ws, out chan ListenOut, stop chan bool){
+func (h HuobiHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
 	defer ws.conn.Close()
 	for {
 		select {
 		default:
-			_, byte, err := ws.conn.ReadMessage()
-			r := bytes.NewReader(byte)
+			_, r, err := ws.conn.NextReader()
+			h.heartBeat(ws)
 			if (err != nil) {
-					panic(err)
+				/*if websocket.IsUnexpectedCloseError(err, websocket.CloseAbnormalClosure) {
+					h.reconnector(ws, out, stop, d)
+					ws.connected=false
+					return
+				} else {*/
+				panic(err)
 			} else {
 				h.handle(ws, r, out)
 			}
@@ -97,13 +100,21 @@ func (h HuobiHandler)reconnector(ws Ws, out chan ListenOut, stop chan bool, d *w
 				}
 				ws.conn = conn
 				ws.connected = true
-				go h.listener(ws, out, stop)
+				go h.listener(ws, out, stop, d)
 			case <-stop:
 				stop <- false
 				return
 			}
 		}
 	}
+}
+
+func (h HuobiHandler) heartBeat(ws Ws) {
+	ping, err := json.Marshal(PingData{18212558000})
+	if err != nil {
+		panic(err)
+	}
+	ws.conn.WriteMessage(websocket.TextMessage,ping)
 }
 
 
@@ -121,4 +132,41 @@ type BinanceHandler struct {}
 //handle messages from binance
 func (b BinanceHandler) handle (ws Ws, reader io.Reader, out chan ListenOut) {
 	out <- ListenOut{2, (string(streamToByte(reader)))}
+}
+
+func (b BinanceHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
+	defer ws.conn.Close()
+	for {
+		_, r, err := ws.conn.NextReader()
+		if err != nil {
+			panic(err)
+		}
+		b.handle(ws, r, out)
+	}
+
+}
+
+func (b BinanceHandler) EstablishConn(url string, subscription string, id string, out chan ListenOut, stop chan bool, d *websocket.Dialer) Ws{
+	req := http.Header{}
+	url = url  + subscription
+	conn, res, err := d.Dial(url, req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	if (err != nil){
+		panic(err)
+	}
+	ws := Ws{conn, true,url, subscription,  id}
+	return ws
+}
+
+func (b BinanceHandler) reconnector(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
+	if (!ws.connected) {
+		b.EstablishConn(ws.url, ws.subscription, ws.id, out, stop, d)
+	}
+}
+
+func (b BinanceHandler) heartBeat(ws Ws){
+
 }
