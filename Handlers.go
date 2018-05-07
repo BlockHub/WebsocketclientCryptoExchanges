@@ -16,11 +16,9 @@ type GenericresHandler interface {
 type HuobiHandler struct {}
 
 
-//handle messages from huobi
+//handle deals with messages from huobi
 func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 	messageIn := Unzip(reader)
-	status, _ := regexp.MatchString("status*", messageIn)
-	connecterr, _ := regexp.MatchString("error*", messageIn)
 	if matched, _ := regexp.MatchString("ping*", messageIn); matched {
 		message, err := strconv.ParseInt(messageIn[8:len(messageIn)-1], 10, 64)
 		if err != nil {
@@ -33,8 +31,6 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 		}
 		ws.conn.WriteMessage(2, messageOut)
 		out <- ListenOut{2, messageIn}
-	} else if (status && connecterr) {
-		//TODO make the ws struct reconnect if it has no more conn
 	} else {
 		//TODO replace messagetype
 		out <- ListenOut{2, messageIn}
@@ -42,8 +38,7 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 
 }
 
-// send a subscription message to huobi
-// TODO incorporate this in the ws struct
+//subscribe sends a subscription message to huobi
 func (h HuobiHandler) subscribe(ws Ws, subMessage string, id string){
 	err := ws.conn.WriteMessage(websocket.TextMessage, prepSubmessage(subMessage, id))
 	if err != nil {
@@ -56,5 +51,5 @@ type BinanceHandler struct {}
 
 //handle messages from binance
 func (b BinanceHandler) handle (ws Ws, reader io.Reader, out chan ListenOut) {
-	out <- ListenOut{2, (string(StreamToByte(reader)))}
+	out <- ListenOut{2, (string(streamToByte(reader)))}
 }

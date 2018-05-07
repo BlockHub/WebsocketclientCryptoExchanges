@@ -19,7 +19,7 @@ func prepSubmessage(subMessage string, id string) []byte {
 }
 
 // convert reader to []byte
-func StreamToByte(stream io.Reader) []byte {
+func streamToByte(stream io.Reader) []byte {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(stream)
 	return buf.Bytes()
@@ -39,7 +39,7 @@ func Unzip(reader io.Reader) string {
 	}
 	return string(buf)
 }
-//prints contents of a channel until a stop signal is given
+//Printer prints contents of a channel until a stop signal is given
 func Printer(l chan ListenOut, stop chan bool){
 	var i int = 0
 	for {

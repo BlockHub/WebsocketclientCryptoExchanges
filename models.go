@@ -1,9 +1,5 @@
 package main
 
-import (
-	"github.com/gorilla/websocket"
-)
-
 //Data to go to out channel
 //all data from exchanges should be in ListenOut before it leaves te scraper
 type ListenOut struct{
@@ -26,22 +22,4 @@ type SubReqSend struct {
 	Sub   string `json:"sub"`
 	ID    string `json:"id"`
 	Unsub string `json:"unsub"`
-}
-
-//represents a client, one client can have multiple connections
-type Client struct{
-	handler 	GenericresHandler
-
-}
-
-//represents a websocket
-type Ws struct {
-	conn 			*websocket.Conn
-	connected 		bool
-	url 			string
-	subscription	string
-}
-
-func newWs(conn *websocket.Conn, connected bool, url string, subscription string) Ws{
-	return Ws{conn, connected, url, subscription}
 }
