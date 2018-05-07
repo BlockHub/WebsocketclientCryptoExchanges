@@ -4,10 +4,7 @@ package main
 //starts a connection with huobi
 func initHuobi( out chan ListenOut, stop chan bool){
 	c := NewClient(HuobiHandler{})
-	ws := c.EstablishConn("wss://api.huobi.pro/ws","market.ethusdt.trade.detail" , out, stop)
-	h := HuobiHandler{}
-	h.subscribe(ws,"market.ethusdt.trade.detail", "id1" )
-	h.subscribe(ws, "market.ethusdt.trade.detail", "id2")
+	c.start("wss://api.huobi.pro/ws", "market.ethusdt.trade.detail", "id1", out, stop)
 	go Printer(out, stop)
 
 }

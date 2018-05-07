@@ -1,6 +1,8 @@
 package main
 
-import "github.com/gorilla/websocket"
+import (
+	"github.com/gorilla/websocket"
+)
 
 //Ws represents a websocket connection
 type Ws struct {
@@ -8,4 +10,5 @@ type Ws struct {
 	connected 		bool
 	url 			string
 	subscription	string
+	id				string
 }

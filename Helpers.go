@@ -47,6 +47,7 @@ func Printer(l chan ListenOut, stop chan bool){
 		default:
 			fmt.Println(i)
 			fmt.Println(<-l)
+			fmt.Println(len(l))
 			i++
 		case <-stop:
 			return
