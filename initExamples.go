@@ -2,7 +2,7 @@ package main
 
 /*
 This contains examples of how to initialize an exchange. Printer is only used to consume values fromt the channels
-A seperate client should be used per exchange. Each client should use multiples Ws connections for each exchange
+A separate client should be used per exchange. Each client should use multiples Ws connections for each exchange
 */
 
 //starts a connection with huobi

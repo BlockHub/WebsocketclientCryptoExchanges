@@ -33,6 +33,7 @@ type PingBinance struct {
 }
 
 //Bitfinex models
+
 //BitFinexSub is a subscription message to BitFinex
 type BitFinexSub struct {
 	Event   string `json:"event"`
