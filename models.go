@@ -7,13 +7,15 @@ type ListenOut struct{
 	message interface{}
 }
 
-//ping message
-type PingData struct {
+
+//Huobi models
+//PingHuobi is a ping message to Huobi
+type PingHuobi struct {
 	Ping int64 `json:"ping"`
 }
 
-//Pong message
-type PongData struct {
+//PongHuobiis a pong message to Huobi
+type PongHuobi struct {
 	Pong int64 `json:"pong"`
 }
 
@@ -23,9 +25,18 @@ type SubReqSend struct {
 	ID    string `json:"id"`
 	Unsub string `json:"unsub"`
 }
-type BitFinexSub struct {
-	event string 	`json:"event"`
-	channel string 	`json:"channel"`
-	symbol string	`json:"symbol"`
 
+
+
+//Bitfinex models
+type BitFinexSub struct {
+	Event 	string 	`json:"event"`
+	Channel string 	`json:"channel"`
+	Symbol 	string	`json:"symbol"`
+
+}
+
+type BitFinexPing struct {
+	Event 	string	`json:"event"`
+	Cid		int		`json:"cid"`
 }

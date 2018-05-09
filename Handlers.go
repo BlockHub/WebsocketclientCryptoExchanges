@@ -44,7 +44,7 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 		if err != nil {
 			panic(err)
 		}
-		v := PongData{ message}
+		v := PongHuobi{ message}
 		messageOut, err := json.Marshal(v)
 		if err != nil {
 			panic(err)
@@ -104,7 +104,7 @@ func (h HuobiHandler)reconnector(ws Ws, out chan ListenOut, stop chan bool, d *w
 }
 
 func (h HuobiHandler) heartBeat(ws Ws) {
-	ping, err := json.Marshal(PingData{18212558000})
+	ping, err := json.Marshal(PingHuobi{18212558000})
 	if err != nil {
 		panic(err)
 	}
@@ -162,7 +162,7 @@ func (b BinanceHandler) reconnector(ws Ws, out chan ListenOut, stop chan bool, d
 }
 
 func (b BinanceHandler) heartBeat(ws Ws){
-	ping, err := json.Marshal(PingData{1})
+	ping, err := json.Marshal(PingHuobi{1})
 	if err != nil {
 		panic(err)
 	}
@@ -174,16 +174,19 @@ type BitfinexHandler struct {
 }
 
 func (bf BitfinexHandler) handle(ws Ws ,reader io.Reader, out chan ListenOut){
+	//TODO filter out info events and corresponding codes
 	out <- ListenOut{2, (string(streamToByte(reader)))}
 }
 
 func (bf BitfinexHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
 	defer ws.conn.Close()
+	bf.subscribe(ws)
 	for {
 		_, r, err := ws.conn.NextReader()
 		if err != nil {
 			panic(err)
 		}
+
 		bf.handle(ws, r, out)
 	}
 }
@@ -199,8 +202,9 @@ func (bf BitfinexHandler) EstablishConn(url string, subscription string,id strin
 	return ws
 }
 
+//subscribe uses ws.id as symbol and ws.subscription as the channel
 func (bf BitfinexHandler) subscribe(ws Ws) {
-	subMessage, err := json.Marshal(BitFinexSub{"subscribe,", "ticker", "tBTCUSD"})
+	subMessage, err := json.Marshal(BitFinexSub{"subscribe", ws.subscription, ws.id})
 	if err != nil {
 		panic(err)
 	}
@@ -211,6 +215,14 @@ func (bf BitfinexHandler) reconnector(ws Ws, out chan ListenOut, stop chan bool,
 
 }
 
+func (bf BitfinexHandler) pinger(ws Ws){
+	ping, err := json.Marshal(BitFinexPing{"ping", 1234})
+	if err != nil {
+		panic(err)
+	}
+	ws.conn.WriteMessage(websocket.TextMessage,ping)
+}
+
 func (bf BitfinexHandler) heartBeat(ws Ws){
-	ws.conn.PingHandler()
+	//https://docs.bitfinex.com/v2/docs/ws-general#section-heartbeating
 }
