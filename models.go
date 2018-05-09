@@ -3,8 +3,8 @@ package main
 //Data to go to out channel
 //all data from exchanges should be in ListenOut before it leaves te scraper
 type ListenOut struct{
-	mt 		int
-	message interface{}
+	exchange 	string
+	message 	interface{}
 }
 
 
@@ -26,6 +26,10 @@ type SubReqSend struct {
 	Unsub string `json:"unsub"`
 }
 
+//Binance models
+type PingBinance struct {
+
+}
 
 
 //Bitfinex models
@@ -40,3 +44,4 @@ type BitFinexPing struct {
 	Event 	string	`json:"event"`
 	Cid		int		`json:"cid"`
 }
+
