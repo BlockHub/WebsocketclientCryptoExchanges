@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 )
-
+//GenericresHandler is an interface for all the functions each exchange needs to have at te least
 type GenericresHandler interface {
 	handle(ws Ws, reader io.Reader, out chan ListenOut)
 	listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer)
@@ -19,6 +19,7 @@ type GenericresHandler interface {
 	reconnecter(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer)
 }
 
+//HuobiHandler is the handler for Huobi
 type HuobiHandler struct{}
 
 //EstablishConn makes a connection to the Huobi endpoint and does not subscribe
@@ -71,9 +72,8 @@ func (h HuobiHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *web
 					fmt.Println("set ws connected to false")
 					h.reconnecter(ws, out, stop, d)
 					return
-				} else {
-					panic(err)
 				}
+				panic(err)
 			} else {
 				h.handle(ws, r, out)
 			}
@@ -112,6 +112,7 @@ func (h HuobiHandler) subscribe(ws Ws, subMessage string, id string) {
 	}
 }
 
+//BinanceHandler is the handler for Huobi
 type BinanceHandler struct{}
 
 //handle messages from binance
@@ -129,10 +130,9 @@ func (b BinanceHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *w
 				fmt.Println("set ws connected to false")
 				b.reconnecter(ws, out, stop, d)
 				return
-			} else {
-				panic(err)
 			}
-		}
+			panic(err)
+			}
 		b.handle(ws, r, out)
 	}
 
@@ -173,6 +173,7 @@ func (b BinanceHandler) heartBeat(ws Ws) {
 	ws.conn.WriteMessage(9, ping)
 }
 
+//BitfinexHandler is the handler for Huobi
 type BitfinexHandler struct {
 }
 
@@ -191,9 +192,8 @@ func (bf BitfinexHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d 
 				fmt.Println("set ws connected to false")
 				bf.reconnecter(ws, out, stop, d)
 				return
-			} else {
-				panic(err)
 			}
+			panic(err)
 		}
 		bf.handle(ws, r, out)
 	}
@@ -240,6 +240,7 @@ func (bf BitfinexHandler) pinger(ws Ws) {
 	ws.conn.WriteMessage(websocket.TextMessage, ping)
 }
 
+//HitBtcHandler is the handler for Huobi
 type hitBtcHandler struct {
 }
 
@@ -259,10 +260,9 @@ func (hi hitBtcHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *w
 				fmt.Println("set ws connected to false")
 				hi.reconnecter(ws, out, stop, d)
 				return
-			} else {
-				panic(err)
 			}
-		}
+			panic(err)
+			}
 		hi.handle(ws, r, out)
 	}
 }

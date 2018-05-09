@@ -2,7 +2,7 @@ package main
 
 import "github.com/gorilla/websocket"
 
-//represents a client, one client can have multiple connections
+//Client can have multiple websocket connections to the same exchange
 type Client struct {
 	handler GenericresHandler
 }
@@ -13,6 +13,7 @@ func NewClient(handler GenericresHandler) Client {
 	return c
 }
 
+//Start starts a websocket connection using the handler of that client
 func (c *Client) Start(url string, subscription string, id string, out chan ListenOut, stop chan bool) {
 	d := websocket.DefaultDialer
 	ws := c.handler.EstablishConn(url, subscription, id, out, stop, d)

@@ -9,8 +9,10 @@ import (
 	"io/ioutil"
 )
 
+
+//TODO should be part of Huobi handler
 func prepSubmessage(subMessage string, id string) []byte {
-	v := SubReqSend{subMessage, id, "false"}
+	v := HuobiSubscription{subMessage, id, "false"}
 	toSub, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
@@ -41,13 +43,10 @@ func Unzip(reader io.Reader) string {
 
 //Printer prints contents of a channel until a stop signal is given
 func Printer(l chan ListenOut, stop chan bool) {
-	var i int = 0
 	for {
 		select {
 		default:
-			fmt.Println(i)
 			fmt.Println(<-l)
-			i++
 		case <-stop:
 			return
 		}
