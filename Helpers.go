@@ -1,12 +1,12 @@
 package main
 
 import (
-	"io"
 	"bytes"
 	"compress/gzip"
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 )
 
 func prepSubmessage(subMessage string, id string) []byte {
@@ -25,11 +25,10 @@ func streamToByte(stream io.Reader) []byte {
 	return buf.Bytes()
 }
 
-
 // Unzip a reader to string
 func Unzip(reader io.Reader) string {
 	r, err := gzip.NewReader(reader)
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
 	defer r.Close()
@@ -39,8 +38,9 @@ func Unzip(reader io.Reader) string {
 	}
 	return string(buf)
 }
+
 //Printer prints contents of a channel until a stop signal is given
-func Printer(l chan ListenOut, stop chan bool){
+func Printer(l chan ListenOut, stop chan bool) {
 	var i int = 0
 	for {
 		select {

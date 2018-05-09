@@ -2,11 +2,10 @@ package main
 
 //Data to go to out channel
 //all data from exchanges should be in ListenOut before it leaves te scraper
-type ListenOut struct{
-	exchange 	string
-	message 	interface{}
+type ListenOut struct {
+	exchange string
+	message  interface{}
 }
-
 
 //Huobi models
 //PingHuobi is a ping message to Huobi
@@ -28,31 +27,27 @@ type SubReqSend struct {
 
 //Binance models
 type PingBinance struct {
-
 }
-
 
 //Bitfinex models
 type BitFinexSub struct {
-	Event 	string 	`json:"event"`
-	Channel string 	`json:"channel"`
-	Symbol 	string	`json:"symbol"`
-
+	Event   string `json:"event"`
+	Channel string `json:"channel"`
+	Symbol  string `json:"symbol"`
 }
 
 type BitFinexPing struct {
-	Event 	string	`json:"event"`
-	Cid		int		`json:"cid"`
+	Event string `json:"event"`
+	Cid   int    `json:"cid"`
 }
 
 //HitBTC models
 type HitBtcSubscription struct {
-	Method string `json:"method"`
+	Method string       `json:"method"`
 	Params HitBtcParams `json:"params"`
-	ID int `json:"id"`
+	ID     int          `json:"id"`
 }
 
 type HitBtcParams struct {
 	Symbol string `json:"symbol"`
 }
-

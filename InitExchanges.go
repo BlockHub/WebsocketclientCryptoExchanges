@@ -1,26 +1,23 @@
 package main
+
 /*
 This contains examples of how to initialize an exchange. Printer is only used to consume values fromt the channels
 A seperate client should be used per exchange. Each client should use multiples Ws connections for each exchange
- */
-
-
+*/
 
 //starts a connection with huobi
-func initHuobi( out chan ListenOut, stop chan bool){
+func initHuobi(out chan ListenOut, stop chan bool) {
 	c := NewClient(HuobiHandler{})
 	c.Start("wss://api.huobi.pro/ws", "market.ethusdt.trade.detail", "id1", out, stop)
 	go Printer(out, stop)
 }
 
-
 //start connection with binance
 func initBinance(out chan ListenOut, stop chan bool) {
-	c := NewClient(BinanceHandler{},)
-	c.Start("wss://stream.binance.com:9443/ws/", "bnbbtc@trade","id1", out, stop)
+	c := NewClient(BinanceHandler{})
+	c.Start("wss://stream.binance.com:9443/ws/", "bnbbtc@trade", "id1", out, stop)
 	go Printer(out, stop)
 }
-
 
 //use subscription as the channel(trades etc.) and id as Symbol, Binance does not allow for user provided ID
 func initBitfinex(out chan ListenOut, stop chan bool) {
