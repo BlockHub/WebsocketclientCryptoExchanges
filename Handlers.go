@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 )
+
 //GenericresHandler is an interface for all the functions each exchange needs to have at te least
 type GenericresHandler interface {
 	handle(ws Ws, reader io.Reader, out chan ListenOut)
@@ -132,7 +133,7 @@ func (b BinanceHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *w
 				return
 			}
 			panic(err)
-			}
+		}
 		b.handle(ws, r, out)
 	}
 
@@ -262,7 +263,7 @@ func (hi hitBtcHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *w
 				return
 			}
 			panic(err)
-			}
+		}
 		hi.handle(ws, r, out)
 	}
 }

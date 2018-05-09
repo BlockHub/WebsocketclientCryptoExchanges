@@ -40,6 +40,7 @@ type BitFinexSub struct {
 	Channel string `json:"channel"`
 	Symbol  string `json:"symbol"`
 }
+
 //BitFinexPing is a ping message to BitFinex
 type BitFinexPing struct {
 	Event string `json:"event"`

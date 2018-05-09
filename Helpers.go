@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 )
 
-
 //TODO should be part of Huobi handler
 func prepSubmessage(subMessage string, id string) []byte {
 	v := HuobiSubscription{subMessage, id, "false"}
