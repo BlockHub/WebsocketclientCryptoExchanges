@@ -22,9 +22,16 @@ func initBinance(out chan ListenOut, stop chan bool) {
 }
 
 
-//use subscription as the channel(trades etc.) and id as Symbol
+//use subscription as the channel(trades etc.) and id as Symbol, Binance does not allow for user provided ID
 func initBitfinex(out chan ListenOut, stop chan bool) {
 	c := NewClient(BitfinexHandler{})
 	c.Start("wss://api.bitfinex.com/ws/2", "trades", "tBTCUSD", out, stop)
+	go Printer(out, stop)
+}
+
+//subscription should be in the form channel@symbol, HitBTC handler takes care of the rest
+func initHitBTC(out chan ListenOut, stop chan bool) {
+	c := NewClient(hitBtcHandler{})
+	c.Start("wss://api.hitbtc.com/api/2/ws", "subscribeTicker@ETHBTC", "2", out, stop)
 	go Printer(out, stop)
 }

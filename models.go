@@ -45,3 +45,14 @@ type BitFinexPing struct {
 	Cid		int		`json:"cid"`
 }
 
+//HitBTC models
+type HitBtcSubscription struct {
+	Method string `json:"method"`
+	Params HitBtcParams `json:"params"`
+	ID int `json:"id"`
+}
+
+type HitBtcParams struct {
+	Symbol string `json:"symbol"`
+}
+

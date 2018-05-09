@@ -22,6 +22,7 @@ type GenericresHandler interface {
 
 type HuobiHandler struct {}
 
+//EstablishConn makes a connection to the Huobi endpoint and does not subscribe
 func (h HuobiHandler) EstablishConn(url string, subscription string, id string,
 									out chan ListenOut, stop chan bool, d *websocket.Dialer ) Ws {
 	req := http.Header{}
@@ -33,11 +34,10 @@ func (h HuobiHandler) EstablishConn(url string, subscription string, id string,
 		panic(err)
 	}
 	ws := Ws{conn, true,url, subscription,  id}
-	h.subscribe(ws, ws.subscription, ws.id)
 	return ws
 }
 
-//handle deals with messages from huobi
+//handle deals with messages from huobi, responds correctly to pings and sends other messages to out
 func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 	messageIn := Unzip(reader)
 	if matched, _ := regexp.MatchString("ping*", messageIn); matched {
@@ -60,6 +60,7 @@ func (h HuobiHandler) handle(ws Ws, reader io.Reader, out chan ListenOut)  {
 
 func (h HuobiHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
 	defer ws.conn.Close()
+	h.subscribe(ws, ws.subscription, ws.id)
 	for {
 		select {
 		default:
@@ -140,6 +141,7 @@ func (b BinanceHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d *w
 
 }
 
+//EstablishConn makes a connection to the Binance endpoint and does subscribe
 func (b BinanceHandler) EstablishConn(url string, subscription string, id string, out chan ListenOut, stop chan bool, d *websocket.Dialer) Ws{
 	req := http.Header{}
 	url = url  + subscription
@@ -201,6 +203,7 @@ func (bf BitfinexHandler) listener(ws Ws, out chan ListenOut, stop chan bool, d 
 	}
 }
 
+//EstablishConn makes a connection to the BitFinex endpoint and does not subscribe
 func (bf BitfinexHandler) EstablishConn(url string, subscription string,id string, out chan ListenOut, stop chan bool, d *websocket.Dialer) Ws {
 	req := http.Header{}
 	conn, res, err := d.Dial(url, req)
@@ -233,10 +236,80 @@ func (bf BitfinexHandler) reconnecter(ws Ws, out chan ListenOut, stop chan bool,
 	out <- ListenOut{"Bitfinex", "reconnected"}
 }
 
+//currently unused, should be used if the user wants to check if the channel is open
 func (bf BitfinexHandler) pinger(ws Ws){
 	ping, err := json.Marshal(BitFinexPing{"ping", 1234})
 	if err != nil {
 		panic(err)
 	}
 	ws.conn.WriteMessage(websocket.TextMessage,ping)
+}
+
+type hitBtcHandler struct {
+
+}
+
+func (hi hitBtcHandler)handle(ws Ws ,reader io.Reader, out chan ListenOut){
+	out <- ListenOut{"HitBTC", (string(streamToByte(reader)))}
+}
+
+
+//listener subcribes to a channel from ws when called, takes messages until it io times out and then reconnect or
+//gives messages to handle
+func (hi hitBtcHandler)listener(ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
+	defer ws.conn.Close()
+	hi.subscribe(ws)
+	for {
+		_, r, err := ws.conn.NextReader()
+		if err != nil {
+			if strings.Contains(err.Error(), "i/o timeout") {
+				fmt.Println("set ws connected to false")
+				hi.reconnecter(ws, out, stop, d)
+				return
+			} else {
+				panic(err)
+			}
+		}
+		hi.handle(ws, r, out)
+	}
+}
+
+//EstablishConn makes a connection to the HitBtc endpoint and does not subscribe
+func (hi hitBtcHandler)EstablishConn(url string, subscription string,id string, out chan ListenOut, stop chan bool, d *websocket.Dialer) Ws{
+	req := http.Header{}
+	conn, res, err := d.Dial(url, req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	ws := Ws{conn,true, url, subscription, id}
+	return ws
+}
+
+
+func (hi hitBtcHandler) reconnecter (ws Ws, out chan ListenOut, stop chan bool, d *websocket.Dialer){
+	req := http.Header{}
+	conn, _, err := d.Dial(ws.url, req)
+	if err != nil {
+		panic(err)
+	}
+	ws = Ws{conn, true, ws.url, ws.subscription, ws.id}
+	go hi.listener(ws, out, stop, d)
+	out <- ListenOut{"HitBTC", "reconnected"}
+}
+
+
+func (hi hitBtcHandler) subscribe (ws Ws) {
+	things := strings.Split(ws.subscription, "@")
+	intId, err := strconv.Atoi(ws.id)
+	if err != nil {
+		panic(err)
+	}
+	params := HitBtcParams{things[1]}
+	subscription, err := json.Marshal(HitBtcSubscription{things[0], params, intId})
+	if err != nil {
+		panic(err)
+	}
+	ws.conn.WriteMessage(websocket.TextMessage, subscription)
+
 }
