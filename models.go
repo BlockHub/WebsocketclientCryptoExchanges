@@ -1,4 +1,4 @@
-package main
+package WebsocketCryptoScraper
 
 //ListenOut contains data from exchanges and the corresponding exchange
 type ListenOut struct {

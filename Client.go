@@ -1,4 +1,4 @@
-package main
+package WebsocketCryptoScraper
 
 import "github.com/gorilla/websocket"
 

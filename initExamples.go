@@ -1,4 +1,4 @@
-package main
+package WebsocketCryptoScraper
 
 /*
 This contains examples of how to initialize an exchange. Printer is only used to consume values fromt the channels
